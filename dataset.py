@@ -1,6 +1,5 @@
 import numpy as np
 import torch
-torch.manual_seed(1010)
 import pandas as pd
 import torch
 from torch.utils.data import Dataset, DataLoader
