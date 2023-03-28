@@ -15,6 +15,7 @@ class TwitterDataset(Dataset):
         self.train = train
         self.pad_id = args.pad_id
         self.patch_len = args.patch_len
+        self.max_len = args.max_len
         self.attention_mode = args.attention_mode
         self.id2label = {
             "0":"NEG",
@@ -54,7 +55,7 @@ class TwitterDataset(Dataset):
             images.append(image)
 
         tokenized_inputs = self.extractor(images=images,text=input_ids, truncation=True, is_split_into_words=True,
-                                          padding='max_length', max_length=self.patch_len,return_tensors="pt")
+                                          padding='max_length', max_length=self.max_len,return_tensors="pt")
 
         text_labels = []
 
