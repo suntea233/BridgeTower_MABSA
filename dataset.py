@@ -74,7 +74,7 @@ class TwitterDataset(Dataset):
                 pre_word_idx = word_idx
 
             if self.attention_mode == "concat_attention":
-                text_labels.append(label_ids + [self.pad_id * self.patch_len])
+                text_labels.append(label_ids + [self.pad_id] * self.patch_len)
             else:
                 text_labels.append(label_ids)
 

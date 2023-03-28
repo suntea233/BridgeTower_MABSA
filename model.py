@@ -48,7 +48,7 @@ class BridgeTowerForMABSA(nn.Module):
 
         self.logits = nn.Linear(self.hidden_dim,self.num_labels)
         self.crf = CRF(self.num_labels, batch_first=True)
-        self.device = torch.device('cpu' if torch.cuda.is_available() else 'cpu')
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.two_stage = False
         self.k = 1
 
@@ -96,7 +96,7 @@ class BridgeTowerForMABSA(nn.Module):
         multi_attention_mask = torch.cat([attention_mask, torch.ones(size=(batch_size, self.patch_len), device=self.device)],
                                      dim=1)
         multi_attention_mask = multi_attention_mask.eq(1)
-        multi_hidden_state = self.mha_layer(multi_hidden_state,multi_hidden_state,multi_hidden_state,key_padding_mask=multi_attention_mask)
+        multi_hidden_state,_ = self.mha_layer(multi_hidden_state,multi_hidden_state,multi_hidden_state,key_padding_mask=multi_attention_mask)
 
         return multi_hidden_state
 

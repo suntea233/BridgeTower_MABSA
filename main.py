@@ -35,8 +35,8 @@ def parse_args():
     parser.add_argument("--epochs",type=int,default=10)
     parser.add_argument("--pretrained_model",type=str,default="BridgeTower/bridgetower-base")
     parser.add_argument("--adapter_hidden_dim",type=int,default=512)
-    parser.add_argument("--is_adapter",type=bool,default=True)
-    parser.add_argument("--attention_mode",type=str,default='gate_attention',choices=['weighted_based_addition','cross_attention','gate_attention','concat_attention'])
+    parser.add_argument("--is_adapter",type=bool,default=False)
+    parser.add_argument("--attention_mode",type=str,default='concat_attention',choices=['weighted_based_addition','cross_attention','gate_attention','concat_attention'])
     parser.add_argument("--is_attention",type=bool,default=True)
 
 
@@ -51,7 +51,7 @@ def parse_args():
 
 
 def train(args):
-    device = torch.device('cpu' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     train_2015_dataset = TwitterDataset(args, train=True)
     train_2015_dataloader = DataLoader(train_2015_dataset, batch_size=args.train_batch_size, collate_fn=train_2015_dataset.collate_fn,
