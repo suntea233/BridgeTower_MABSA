@@ -106,12 +106,12 @@ class BridgeTowerForMABSA(nn.Module):
         index = multi_hidden_state.topk(self.k)[1]
 
         if self.k == 1:
-            picked_image_state = torch.gather(image_hidden_state, dim=1, index=index.repeat(1, 1, 768))
+            picked_image_state = torch.gather(image_hidden_state, dim=1, index=index.repeat(1, 1, self.hidden_dim))
             weighted_image_state = picked_image_state * value
             multi_hidden_state = text_hidden_state + weighted_image_state
         else:
             picked_image_state = torch.gather(image_hidden_state.unsqueeze(2).repeat(1, 1, self.k, 1), dim=1,
-                                              index=index.unsqueeze(3).repeat(1, 1, 1, 768))
+                                              index=index.unsqueeze(3).repeat(1, 1, 1, self.hidden_dim))
             weighted_image_state = picked_image_state * value.unsqueeze(3)
             weighted_image_state = weighted_image_state.transpose(2, 3)
             weighted_image_state = self.inter_image(weighted_image_state)

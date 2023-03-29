@@ -11,7 +11,7 @@ from tqdm import tqdm
 def parse_args():
     parser =argparse.ArgumentParser()
     parser.add_argument("--dataset",type=str,default="Twitter2015")
-    parser.add_argument("--queue_size",type=int,default=16)
+    parser.add_argument("--queue_size",type=int,default=256,choices=[128,256,512,1024])
     parser.add_argument("--seed",type=int,default=3407)
     parser.add_argument("--lr",type=float,default=5e-4)
     parser.add_argument("--weight_decay",type=float,default=1e-2)
@@ -30,7 +30,7 @@ def parse_args():
     parser.add_argument("--max_len",type=int,default=50)
     parser.add_argument("--momentum",type=float,default=0.999)
     parser.add_argument("--temp",type=float,default=0.07)
-    parser.add_argument("--train_batch_size",type=int,default=1)
+    parser.add_argument("--train_batch_size",type=int,default=8)
     parser.add_argument("--eval_batch_size",type=int,default=1)
     parser.add_argument("--epochs",type=int,default=10)
     parser.add_argument("--pretrained_model",type=str,default="BridgeTower/bridgetower-base")
@@ -151,4 +151,9 @@ if __name__ == "__main__":
     args = parse_args()
     print("args", args)
     torch.manual_seed(args.seed)
-    train(args)
+
+    for attention_mode in ['weighted_based_addition','cross_attention','gate_attention','concat_attention']:
+        for weight_decay in [1e-2,1e-3,1e-4,1e-5,1e-6]:
+            args.attention_mode = attention_mode
+            args.weight_decay = weight_decay
+            train(args)
