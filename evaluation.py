@@ -13,8 +13,14 @@ def evaluate(test_dataloader,model):
             device), pixel_values.to(device), pixel_mask.to(device), labels.to(device)
 
         logits = model(input_ids,attention_mask,pixel_values,pixel_mask,labels=None)
+        batch_size = input_ids.shape[0]
+        if model.attention_mode == "concat_attention":
+            crf_mask = torch.cat([attention_mask, torch.zeros(size=(batch_size, model.patch_len), device=device)],
+                                 dim=1)
+            crf_mask = crf_mask.eq(1)
+        else:
+            crf_mask = attention_mask.eq(1)
 
-        crf_mask = attention_mask.eq(1)
         logits = model.crf.decode(logits, mask=crf_mask)
         logits = np.array(logits)
         logits = logits.tolist()[0]
