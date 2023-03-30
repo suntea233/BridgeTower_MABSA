@@ -158,6 +158,7 @@ class BridgeTowerForMABSA(nn.Module):
             if self.attention_mode == "concat_attention":
                 crf_mask = torch.cat([attention_mask, torch.zeros(size=(batch_size, self.patch_len), device=self.device)],
                                      dim=1)
+                crf_mask = crf_mask.eq(1)
             else:
                 crf_mask = attention_mask.eq(1)
 
