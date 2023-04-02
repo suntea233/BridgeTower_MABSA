@@ -51,7 +51,7 @@ def parse_args():
 
 
 def train(args):
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cpu' if torch.cuda.is_available() else 'cpu')
 
     train_2015_dataset = TwitterDataset(args, train=True)
     train_2015_dataloader = DataLoader(train_2015_dataset, batch_size=args.train_batch_size, collate_fn=train_2015_dataset.collate_fn,
@@ -152,8 +152,8 @@ if __name__ == "__main__":
     print("args", args)
     torch.manual_seed(args.seed)
 
-    for attention_mode in ['weighted_based_addition','cross_attention','gate_attention','concat_attention']:
-        for weight_decay in [1e-2,1e-3,1e-4,1e-5,1e-6]:
-            args.attention_mode = attention_mode
-            args.weight_decay = weight_decay
-            train(args)
+    # for attention_mode in ['weighted_based_addition','cross_attention','gate_attention','concat_attention']:
+    for weight_decay in [1e-2,1e-3,1e-4,1e-5,1e-6]:
+        # args.attention_mode = attention_mode
+        args.weight_decay = weight_decay
+        train(args)

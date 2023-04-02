@@ -1,18 +1,19 @@
 import torch
 import numpy as np
 
-def evaluate(test_dataloader,model):
 
+def evaluate(test_dataloader, model):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.eval()
 
     predictions, true_labels = [], []
 
-    for input_ids,attention_mask,pixel_values,pixel_mask,labels in test_dataloader:
+    for input_ids, attention_mask, pixel_values, pixel_mask, labels in test_dataloader:
         input_ids, attention_mask, pixel_values, pixel_mask, labels = input_ids.to(device), attention_mask.to(
             device), pixel_values.to(device), pixel_mask.to(device), labels.to(device)
 
-        logits = model(input_ids,attention_mask,pixel_values,pixel_mask,labels=None)
+        logits = model(input_ids, attention_mask, pixel_values, pixel_mask, labels=None)
+
         batch_size = input_ids.shape[0]
         if model.attention_mode == "concat_attention":
             crf_mask = torch.cat([attention_mask, torch.zeros(size=(batch_size, model.patch_len), device=device)],
@@ -24,12 +25,11 @@ def evaluate(test_dataloader,model):
         logits = model.crf.decode(logits, mask=crf_mask)
         logits = np.array(logits)
         logits = logits.tolist()[0]
-        predictions += logits[1:-1] # remove ['CLS'] and ['SEP']
+        predictions += logits[1:-1]  # remove ['CLS'] and ['SEP']
 
         true_labels += labels.tolist()[0][:len(logits)][1:-1]
 
     true, pre = true_labels, predictions
-
 
     label2id = {
         "O": 0,
@@ -83,9 +83,10 @@ def evaluate(test_dataloader,model):
                 if p[i][0] in t[j]:
                     if p[i][0] == t[j][0] and p[i][1] == t[j][1]:
                         cnt += 1
-
+    if predict == 0:
+        return 0
     precision = cnt / predict
     recall = cnt / gold
     f1 = f1_score(precision, recall)
 
-    return f1
+    return f1,precision,recall
