@@ -50,16 +50,13 @@ def parse_args():
     return args
 
 
-def train(args):
+def first_step_train(args):
     device = torch.device('cpu' if torch.cuda.is_available() else 'cpu')
 
     train_2015_dataset = TwitterDataset(args, train=True)
     train_2015_dataloader = DataLoader(train_2015_dataset, batch_size=args.train_batch_size, collate_fn=train_2015_dataset.collate_fn,
                                        shuffle=True)
 
-    test_2015_dataset = TwitterDataset(args, train=False)
-    test_2015_dataloader = DataLoader(test_2015_dataset, batch_size=args.eval_batch_size, collate_fn=test_2015_dataset.collate_fn,
-                                      shuffle=True)
 
     model = BridgeTowerForMABSA(args).to(device)
 
@@ -98,6 +95,25 @@ def train(args):
         print("cl_loss = {}".format(losses / cnt))
 
     print("first_step finished")
+
+    return model
+
+
+def second_step_train(args,model):
+
+    device = torch.device('cpu' if torch.cuda.is_available() else 'cpu')
+
+    train_2015_dataset = TwitterDataset(args, train=True)
+    train_2015_dataloader = DataLoader(train_2015_dataset, batch_size=args.train_batch_size, collate_fn=train_2015_dataset.collate_fn,
+                                       shuffle=True)
+
+    test_2015_dataset = TwitterDataset(args, train=False)
+    test_2015_dataloader = DataLoader(test_2015_dataset, batch_size=args.eval_batch_size, collate_fn=test_2015_dataset.collate_fn,
+                                      shuffle=True)
+
+    num_warmup_steps = args.num_warmup_steps
+    max_grad_norm = args.max_grad_norm
+
     model.two_stage = True
 
     second_step_lr = args.second_step_lr
@@ -132,8 +148,8 @@ def train(args):
             losses += crf_loss.item()
 
 
-        f1 = evaluate(test_2015_dataloader, model)
-        print(f1)
+        f1,p,r = evaluate(test_2015_dataloader, model)
+        print(f1,p,r)
 
         if args.dataset == "Twitter2015":
             sota = 0.688
@@ -152,8 +168,11 @@ if __name__ == "__main__":
     print("args", args)
     torch.manual_seed(args.seed)
 
+    model = first_step_train(args)
+
     # for attention_mode in ['weighted_based_addition','cross_attention','gate_attention','concat_attention']:
+
     for weight_decay in [1e-2,1e-3,1e-4,1e-5,1e-6]:
         # args.attention_mode = attention_mode
         args.weight_decay = weight_decay
-        train(args)
+        second_step_train(args,model)
